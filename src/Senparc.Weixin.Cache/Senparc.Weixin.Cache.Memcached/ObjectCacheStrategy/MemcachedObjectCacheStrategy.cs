@@ -1,4 +1,18 @@
-﻿using System;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2018 Senparc
+
+    文件名：MemcachedObjectCacheStrategy.cs
+    文件功能描述：本地锁
+
+
+    创建标识：Senparc - 20161025
+
+    修改标识：Senparc - 20170205
+    修改描述：v0.2.0 重构分布式锁
+
+----------------------------------------------------------------*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -33,7 +47,12 @@ namespace Senparc.Weixin.Cache.Memcached
         public MemcachedObjectCacheStrategy()
         {
             _config = GetMemcachedClientConfiguration();
+
+#if NET45 || NET461
             _cache = new MemcachedClient(_config);
+#else
+            _cache = new MemcachedClient(null, _config);
+#endif
         }
 
         //静态LocalCacheStrategy
@@ -61,7 +80,13 @@ namespace Senparc.Weixin.Cache.Memcached
         private static MemcachedClientConfiguration GetMemcachedClientConfiguration()
         {
             //每次都要新建
+
+#if NET45 || NET461
             var config = new MemcachedClientConfiguration();
+#else
+            var config = new MemcachedClientConfiguration(null, null);
+#endif
+
             foreach (var server in _serverlist)
             {
                 config.Servers.Add(new IPEndPoint(IPAddress.Parse(server.Key), server.Value));
@@ -94,34 +119,46 @@ namespace Senparc.Weixin.Cache.Memcached
 
             //cache = new MemcachedClient();
             //cache.EnableCompression = false;
-            try
-            {
-                //config.Authentication.Type = typeof(PlainTextAuthenticator);
-                //config.Authentication.Parameters["userName"] = "username";
-                //config.Authentication.Parameters["password"] = "password";
-                //config.Authentication.Parameters["zone"] = "zone";//domain?   ——Jeffrey 2015.10.20
-                DateTime dt1 = DateTime.Now;
-                var config = GetMemcachedClientConfiguration();
-                var cache = new MemcachedClient(config);
 
-                var testKey = Guid.NewGuid().ToString();
-                var testValue = Guid.NewGuid().ToString();
-                cache.Store(StoreMode.Set, testKey, testValue);
-                var storeValue = cache.Get(testKey);
-                if (storeValue as string != testValue)
-                {
-                    throw new Exception("MemcachedStrategy失效，没有计入缓存！");
-                }
-                cache.Remove(testKey);
-                DateTime dt2 = DateTime.Now;
+            #region 内部为测试代码，因为调用RegisterServerList()静态方法前会先执行此静态构造函数，此时_serverlist还没有被初始化，故会出错
 
-                WeixinTrace.Log(string.Format("MemcachedStrategy正常启用，启动及测试耗时：{0}ms", (dt2 - dt1).TotalMilliseconds));
-            }
-            catch (Exception ex)
-            {
-                //TODO:记录是同日志
-                WeixinTrace.Log(string.Format("MemcachedStrategy静态构造函数异常：{0}", ex.Message));
-            }
+//            try
+//            {
+//                //config.Authentication.Type = typeof(PlainTextAuthenticator);
+//                //config.Authentication.Parameters["userName"] = "username";
+//                //config.Authentication.Parameters["password"] = "password";
+//                //config.Authentication.Parameters["zone"] = "zone";//domain?   ——Jeffrey 2015.10.20
+//                DateTime dt1 = DateTime.Now;
+//                var config = GetMemcachedClientConfiguration();
+//                //var cache = new MemcachedClient(config);'
+
+
+//#if NET45 || NET461
+//                var cache = new MemcachedClient(config);
+//#else
+//                var cache = new MemcachedClient(null, config);
+//#endif
+
+//                var testKey = Guid.NewGuid().ToString();
+//                var testValue = Guid.NewGuid().ToString();
+//                cache.Store(StoreMode.Set, testKey, testValue);
+//                var storeValue = cache.Get(testKey);
+//                if (storeValue as string != testValue)
+//                {
+//                    throw new Exception("MemcachedStrategy失效，没有计入缓存！");
+//                }
+//                cache.Remove(testKey);
+//                DateTime dt2 = DateTime.Now;
+
+//                WeixinTrace.Log(string.Format("MemcachedStrategy正常启用，启动及测试耗时：{0}ms", (dt2 - dt1).TotalMilliseconds));
+//            }
+//            catch (Exception ex)
+//            {
+//                //TODO:记录是同日志
+//                WeixinTrace.Log(string.Format("MemcachedStrategy静态构造函数异常：{0}", ex.Message));
+//            }
+
+            #endregion
         }
 
         #endregion
@@ -200,7 +237,7 @@ namespace Senparc.Weixin.Cache.Memcached
 
         public override ICacheLock BeginCacheLock(string resourceName, string key, int retryCount = 0, TimeSpan retryDelay = new TimeSpan())
         {
-            return new MemcachedCacheLock(this, resourceName, key, retryCount, retryDelay).LockNow();
+            return new MemcachedCacheLock(this, resourceName, key, retryCount, retryDelay);
         }
     }
 }
