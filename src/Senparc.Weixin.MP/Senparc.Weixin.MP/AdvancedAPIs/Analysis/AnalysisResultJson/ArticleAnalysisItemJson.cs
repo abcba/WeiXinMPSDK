@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2019 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2018 Senparc
+    Copyright (C) 2019 Senparc
     
     文件名：ArticleAnalysisItemJson.cs
     文件功能描述：获取图文群发每日数据返回结果 单条数据类
@@ -159,8 +159,30 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.Analysis
         /// 收藏的次数
         /// </summary>
         public int add_to_fav_count { get; set; }
+
+        #region 官方暂无说明文字
+
+        public int int_page_from_session_read_user { get; set; }
+        public int int_page_from_session_read_count { get; set; }
+        public int int_page_from_hist_msg_read_user { get; set; }
+        public int int_page_from_hist_msg_read_count { get; set; }
+        public int int_page_from_feed_read_user { get; set; }
+        public int int_page_from_feed_read_count { get; set; }
+        public int int_page_from_friends_read_user { get; set; }
+        public int int_page_from_friends_read_count { get; set; }
+        public int int_page_from_other_read_user { get; set; }
+        public int int_page_from_other_read_count { get; set; }
+        public int feed_share_from_session_user { get; set; }
+        public int feed_share_from_session_cnt { get; set; }
+        public int feed_share_from_feed_user { get; set; }
+        public int feed_share_from_feed_cnt { get; set; }
+        public int feed_share_from_other_user { get; set; }
+        public int feed_share_from_other_cnt { get; set; }
+
+        #endregion
+
     }
-    
+
     /// <summary>
     /// 图文统计数据 单条数据
     /// </summary>
